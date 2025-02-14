@@ -1,11 +1,13 @@
-@Override
-public void onPaymentSuccess(String razorpayPaymentId) {
-    // Handle successful payment and update the balance
-    Toast.makeText(WalletActivity.this, "Payment Successful", Toast.LENGTH_SHORT).show();
-}
-
-@Override
-public void onPaymentError(int code, String response) {
-    // Handle payment failure
-    Toast.makeText(WalletActivity.this, "Payment Failed", Toast.LENGTH_SHORT).show();
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Only authenticated users can read and write their own data
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      
+      match /transactions/{transactionId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+  }
 }
