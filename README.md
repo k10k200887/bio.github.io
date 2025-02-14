@@ -1,13 +1,15 @@
-service cloud.firestore {
-  match /databases/{database}/documents {
-    
-    // Only authenticated users can read and write their own data
-    match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-      
-      match /transactions/{transactionId} {
-        allow read, write: if request.auth != null && request.auth.uid == userId;
-      }
-    }
-  }
+private void updateUserProfile(String name, String phoneNumber) {
+    String userId = mAuth.getCurrentUser().getUid();
+    Map<String, Object> userProfile = new HashMap<>();
+    userProfile.put("name", name);
+    userProfile.put("phoneNumber", phoneNumber);
+
+    db.collection("users").document(userId)
+        .update(userProfile)
+        .addOnSuccessListener(aVoid -> {
+            Toast.makeText(WalletActivity.this, "Profile updated successfully.", Toast.LENGTH_SHORT).show();
+        })
+        .addOnFailureListener(e -> {
+            Toast.makeText(WalletActivity.this, "Failed to update profile.", Toast.LENGTH_SHORT).show();
+        });
 }
