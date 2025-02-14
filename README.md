@@ -1,20 +1,27 @@
-private void storeTransaction(double amount, String type) {
+private void viewTransactions() {
     String userId = mAuth.getCurrentUser().getUid();
-    String transactionId = db.collection("users").document(userId).collection("transactions").document().getId();
-    
-    Map<String, Object> transaction = new HashMap<>();
-    transaction.put("type", type);  // "credit" or "debit"
-    transaction.put("amount", amount);
-    transaction.put("timestamp", FieldValue.serverTimestamp());
 
     db.collection("users").document(userId)
         .collection("transactions")
-        .document(transactionId)
-        .set(transaction)
-        .addOnSuccessListener(aVoid -> {
-            Toast.makeText(WalletActivity.this, "Transaction recorded.", Toast.LENGTH_SHORT).show();
+        .orderBy("timestamp", Query.Direction.DESCENDING)
+        .get()
+        .addOnSuccessListener(queryDocumentSnapshots -> {
+            List<String> transactionHistory = new ArrayList<>();
+            for (DocumentSnapshot document : queryDocumentSnapshots) {
+                String type = document.getString("type");
+                double amount = document.getDouble("amount");
+                Timestamp timestamp = document.getTimestamp("timestamp");
+                transactionHistory.add(type + ": ₹" + amount + " on " + timestamp.toDate().toString());
+            }
+            // Display the transactions in a RecyclerView or ListView
+            updateTransactionUI(transactionHistory);
         })
         .addOnFailureListener(e -> {
-            Toast.makeText(WalletActivity.this, "Failed to record transaction.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(WalletActivity.this, "Failed to load transactions.", Toast.LENGTH_SHORT).show();
         });
+}
+
+private void updateTransactionUI(List<String> transactionHistory) {
+    // Update the UI with the list of transactions
+    // For example, set it in a RecyclerView or ListView
 }
